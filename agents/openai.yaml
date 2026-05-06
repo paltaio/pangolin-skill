@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pangolin Integration API"
+  short_description: "Work with Pangolin Integration API"
+  default_prompt: "Use $pangolin-skill to do actions on Pangolin via its integration API."
