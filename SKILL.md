@@ -1,5 +1,5 @@
 ---
-name: pangolin-skill
+name: pangolin
 description: Pangolin Integration API reference and Bun TypeScript client helper. Use when Codex needs to call, inspect, explain, document, or generate code against Pangolin's `/v1` Integration API, including API-key auth, organizations, sites, resources, domains, users, roles, access controls, access tokens, API keys, identity providers, clients, blueprints, logs, analytics, and private/proprietary SaaS routes.
 ---
 
