@@ -7,7 +7,7 @@ Common `Domain` fields:
   domainId: string;
   baseDomain: string;
   configManaged: boolean;
-  type: string | null; // "ns" | "cname" | "wildcard"
+  type: "ns" | "cname" | "wildcard" | null;
   verified: boolean;
   failed: boolean;
   tries: number;
@@ -24,7 +24,7 @@ Common DNS record fields:
 {
   id: number;
   domainId: string;
-  recordType: string; // "NS" | "CNAME" | "A" | "TXT"
+  recordType: "NS" | "CNAME" | "A" | "TXT";
   baseDomain: string | null;
   value: string;
   verified: boolean;
@@ -57,7 +57,7 @@ Response data:
     domainId: string;
     baseDomain: string;
     verified: boolean;
-    type: string | null;
+    type: "ns" | "cname" | "wildcard" | null;
     failed: boolean;
     tries: number;
     configManaged: boolean;
@@ -102,10 +102,10 @@ JSON body:
 
 | Field | Type | Required | Constraints |
 | --- | --- | --- | --- |
-| `type` | `"ns" | "cname" | "wildcard"` | yes | OSS only supports `wildcard`; SaaS only allows `ns` and `cname`; enterprise allows all three. |
-| `baseDomain` | subdomain/domain string | yes | Must pass `subdomainSchema` and `isValidDomain`. CNAME at a second-level/root domain is rejected. |
-| `certResolver` | string or null | no | Stored on created domain. |
-| `preferWildcardCert` | boolean or null | no | Stored as `false` when omitted/null. |
+| `type` | `"ns" \| "cname" \| "wildcard"` | yes | OSS only supports `"wildcard"` (others return `501`); SaaS only allows `"ns"` and `"cname"` (`"wildcard"` returns `400`); enterprise allows all three. |
+| `baseDomain` | string | yes | Must match `subdomainSchema` regex `^(?!:\/\/)([a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)*[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$`, min length 1, lowercased on store; must also pass `isValidDomain`. `"cname"` at a second-level/root (zone apex) domain is rejected with `400` (RFC 1912 §2.4). |
+| `certResolver` | string or null | no | Stored verbatim on created domain. Only used for `"wildcard"` type. |
+| `preferWildcardCert` | boolean or null | no | Stored as `false` when omitted/null. Only used for `"wildcard"` type. |
 
 Response data:
 
@@ -139,8 +139,8 @@ JSON body:
 
 | Field | Type | Required | Constraints |
 | --- | --- | --- | --- |
-| `certResolver` | string or null | no | Stored when key is present. |
-| `preferWildcardCert` | boolean or null | no | Stored only when not `undefined` and not `null`. |
+| `certResolver` | string or null | no | Stored when key is present. Updates only persist for domains with `type === "wildcard"`; other types return `400`. |
+| `preferWildcardCert` | boolean or null | no | Stored only when not `undefined` and not `null`. Updates only persist for domains with `type === "wildcard"`; other types return `400`. |
 
 Response data:
 

@@ -15,14 +15,14 @@ Request body:
 | Field | Type | Required | Constraints |
 | --- | --- | --- | --- |
 | `name` | string | yes | 1-255 chars. |
-| `type` | `"newt" | "wireguard" | "local"` | yes | Site type. |
-| `exitNodeId` | positive integer | no | Exit node to use. |
-| `niceId` | string | no | 1-255 chars. |
-| `pubKey` | string | no | Used by WireGuard-style setup. |
-| `subnet` | string | no | Site subnet. |
-| `newtId` | string | no | Newt ID; generated if omitted. |
-| `secret` | string | no | Newt secret; generated if omitted. |
-| `address` | string | no | Site address. |
+| `type` | `"newt" | "wireguard" | "local"` | yes | Cross-field rules enforced post-Zod: `wireguard` requires `subnet`, `exitNodeId`, and `pubKey` (else HTTP 400); `local` forces `subnet = "0.0.0.0/32"`, `online = true`, `dockerSocketEnabled = false`; `newt` ignores `subnet`/`exitNodeId` (chosen on connect). |
+| `exitNodeId` | positive integer | no | Required for `wireguard`; also used to assign a `local` site to a node. |
+| `niceId` | string | no | 1-255 chars. Defaults to a unique generated value. |
+| `pubKey` | string | no | WireGuard public key. Required for `wireguard`. |
+| `subnet` | string | no | CIDR within the exit node's address range. Required for `wireguard`. |
+| `newtId` | string | no | Used for `newt`; generated if omitted. |
+| `secret` | string | no | Used for `newt`; server generates a 48-char secret if omitted. |
+| `address` | string | no | IPv4 within the org subnet. Server formats with the org block size. |
 
 Response data:
 
@@ -78,8 +78,8 @@ Response data:
     megabytesIn: number;
     megabytesOut: number;
     orgName: string;
-    type: string;
-    online?: boolean | null;
+    type: "newt" | "wireguard" | "local"; // DB column comment says only "newt"|"wireguard"; "local" was added later — readers must expect all three.
+    online?: boolean | null; // undefined for `local` sites (stripped server-side).
     address: string | null;
     newtVersion: string | null;
     exitNodeId: number | null;
@@ -188,7 +188,7 @@ Request body:
 | --- | --- | --- | --- |
 | `name` | string | no | 1-255 chars. |
 | `niceId` | string | no | 1-255 chars; checked for uniqueness. |
-| `dockerSocketEnabled` | boolean | no | Enables/disables Docker socket integration. |
+| `dockerSocketEnabled` | boolean | no | Enables/disables Docker socket integration. Forced to `false` for `local` sites at create time. |
 | `status` | `"pending" | "approved"` | no | Site approval status. |
 
 Response:

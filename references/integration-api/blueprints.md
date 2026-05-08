@@ -1,6 +1,6 @@
 # Blueprints
 
-All routes use bearer API-key authentication and `verifyApiKeyOrgAccess`. Blueprint objects include `blueprintId`, `orgId`, `name`, `source`, `createdAt`, `succeeded`, `contents`, and `message`.
+All routes use bearer API-key authentication and `verifyApiKeyOrgAccess`. Blueprint objects include `blueprintId`, `orgId`, `name`, `source` (`"API" | "UI" | "NEWT" | "CLI"`), `createdAt`, `succeeded`, `contents`, and `message`. Blueprints applied through this `PUT /v1/org/:orgId/blueprint` endpoint are always recorded with `source: "API"`; the other values appear only when blueprints are applied internally.
 
 ## `PUT /v1/org/:orgId/blueprint`
 
@@ -15,7 +15,7 @@ Request:
 
 Response: envelope with `data: null`, message `Blueprint applied successfully`, status `201`.
 
-Errors include `400` for invalid params/body, `400` with message `Failed to update from config: ...` for base64/JSON/apply failures, and `500` with message `An error occurred`.
+Errors include `400` for invalid params/body, `400` with message `Failed to update database from config: ...` for base64/JSON/apply failures, and `500` with message `An error occurred`.
 
 ## `GET /v1/org/:orgId/blueprint/:blueprintId`
 
@@ -40,7 +40,7 @@ Response data:
 }
 ```
 
-Errors include `400` for invalid params, `404` with message `Client not found` when the blueprint is missing, and `500` with message `An error occurred`.
+Success message is `Client retrieved successfully` (copy-paste from the clients router; not a typo on your side). Errors include `400` for invalid params, `404` with message `Client not found` when the blueprint is missing, and `500` with message `An error occurred`.
 
 ## `GET /v1/org/:orgId/blueprints`
 

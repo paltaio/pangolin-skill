@@ -32,7 +32,7 @@ Response data:
     action: boolean;
     reason: number;
     orgId: string | null;
-    actorType: string | null;
+    actorType: "user" | "apiKey" | null; // runtime values; DB column is open string
     actor: string | null;
     actorId: string | null;
     resourceId: number | null;
@@ -116,7 +116,7 @@ Auth: valid license; subscription `tierMatrix.actionLogs`; API key with org acce
 Request:
 
 - Path param `orgId: string`.
-- Query params: shared log-query fields plus `action?: string`, `actorType?: string`, `actorId?: string`, and `actor?: string`.
+- Query params: shared log-query fields plus `action?: string`, `actorType?: string` (only `"user"` or `"apiKey"` actually match recorded rows), `actorId?: string`, and `actor?: string`.
 - No body.
 
 Response data:
@@ -126,7 +126,7 @@ Response data:
   log: Array<{
     orgId: string;
     action: string;
-    actorType: string;
+    actorType: "user" | "apiKey"; // runtime values; DB column is open string
     metadata: string | null;
     actorId: string;
     timestamp: number;
@@ -160,7 +160,7 @@ Auth: valid license; subscription `tierMatrix.accessLogs`; API key with org acce
 Request:
 
 - Path param `orgId: string`.
-- Query params: shared log-query fields plus `action?: boolean | "true" | "false"`, `actorType?: string`, `actorId?: string`, `resourceId?: positive integer`, `actor?: string`, `type?: string`, and `location?: string`.
+- Query params: shared log-query fields plus `action?: boolean | "true" | "false"`, `actorType?: string` (only `"user"` or `"apiKey"` actually match recorded rows), `actorId?: string`, `resourceId?: positive integer`, `actor?: string`, `type?: string`, and `location?: string`.
 - No body.
 
 Response data:
@@ -170,7 +170,7 @@ Response data:
   log: Array<{
     orgId: string;
     action: boolean;
-    actorType: string | null;
+    actorType: "user" | "apiKey" | null; // runtime values; DB column is open string
     actorId: string | null;
     resourceId: number | null;
     resourceName: string | null;
@@ -242,7 +242,7 @@ Response data:
     siteNiceId: string | null;
     clientName: string | null;
     clientNiceId: string | null;
-    clientType: string | null;
+    clientType: string | null; // currently only `"olm"` is created; column is open varchar
     userEmail: string | null;
   }>;
   pagination: { total: number; limit: number; offset: number };

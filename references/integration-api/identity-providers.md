@@ -64,8 +64,8 @@ Response data:
   idps: Array<{
     idpId: number;
     name: string;
-    type: string;
-    variant: string | null;
+    type: "oidc";
+    variant: "oidc" | "google" | "azure" | null;
     orgCount: number;
     autoProvision: boolean;
     tags: string | null;
@@ -91,7 +91,7 @@ Response data:
   idp: {
     idpId: number;
     name: string;
-    type: string;
+    type: "oidc";
     defaultRoleMapping: string | null;
     defaultOrgMapping: string | null;
     autoProvision: boolean;
@@ -100,7 +100,7 @@ Response data:
   idpOidcConfig: {
     idpOauthConfigId: number;
     idpId: number;
-    variant: string;
+    variant: "oidc" | "google" | "azure";
     clientId: string;
     clientSecret: string;
     authUrl: string;
@@ -263,8 +263,8 @@ Response data:
     idpId: number;
     orgId: string;
     name: string;
-    type: string;
-    variant: string;
+    type: "oidc";
+    variant: "oidc" | "google" | "azure";
     tags: string | null;
   }>;
   pagination: { total: number; limit: number; offset: number };

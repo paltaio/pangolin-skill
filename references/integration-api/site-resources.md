@@ -61,11 +61,11 @@ JSON body:
 | `userIds` | string array | yes | Inserted into user-site-resource associations. |
 | `roleIds` | integer array | yes | Inserted into role-site-resource associations after admin role is added. |
 | `clientIds` | integer array | yes | Inserted into client-site-resource associations. |
-| `tcpPortRangeString` | port range string | no | For HTTP mode stored as `443,80`. |
-| `udpPortRangeString` | port range string | no | For HTTP mode stored as empty string. |
-| `disableIcmp` | boolean | no | Stored as provided, or `true` for HTTP mode. |
-| `authDaemonPort` | positive integer | no | Stored only when `sshPam` is licensed/subscribed. |
-| `authDaemonMode` | `"site" | "remote"` | no | Stored only when `sshPam` is licensed/subscribed. |
+| `tcpPortRangeString` | port range string | no | When `mode` is `http` the server forces `"443,80"` regardless of input. |
+| `udpPortRangeString` | port range string | no | When `mode` is `http` the server forces `""` regardless of input. |
+| `disableIcmp` | boolean | no | When `mode` is `http` the server forces `true` regardless of input; otherwise stored as provided (default `false`). |
+| `authDaemonPort` | positive integer | no | Silently dropped on write unless the `sshPam` tier feature is licensed/subscribed. |
+| `authDaemonMode` | `"site" | "remote"` | no | Silently dropped on write unless the `sshPam` tier feature is licensed/subscribed. |
 | `domainId` | string | no | Used with `subdomain` to construct `fullDomain`; mutually exclusive with `alias`. |
 | `subdomain` | string | no | Used only with `domainId`. |
 
@@ -208,11 +208,11 @@ JSON body:
 | `userIds` | string array | yes | Replaces user associations. |
 | `roleIds` | integer array | yes | Replaces non-admin role associations. |
 | `clientIds` | integer array | yes | Replaces client associations. |
-| `tcpPortRangeString` | port range string | no | For HTTP mode and site changes stored as `443,80`; otherwise stored as provided. |
-| `udpPortRangeString` | port range string | no | For HTTP mode and site changes stored as empty string; otherwise stored as provided. |
-| `disableIcmp` | boolean | no | For HTTP mode and site changes stored as `true` unless explicitly truthy logic differs. |
-| `authDaemonPort` | positive integer or null | no | Stored only when `sshPam` is licensed/subscribed. |
-| `authDaemonMode` | `"site" | "remote"` | no | Stored only when `sshPam` is licensed/subscribed. |
+| `tcpPortRangeString` | port range string | no | When `mode` is `http` the server forces `"443,80"` regardless of input; otherwise stored as provided. |
+| `udpPortRangeString` | port range string | no | When `mode` is `http` the server forces `""` regardless of input; otherwise stored as provided. |
+| `disableIcmp` | boolean | no | When `mode` is `http` the server forces `true` regardless of input; otherwise stored as provided (default `false`). |
+| `authDaemonPort` | positive integer or null | no | Silently dropped on write unless the `sshPam` tier feature is licensed/subscribed. |
+| `authDaemonMode` | `"site" | "remote"` | no | Silently dropped on write unless the `sshPam` tier feature is licensed/subscribed. |
 | `domainId` | string | no | Used with `subdomain` to construct `fullDomain`. |
 | `subdomain` | string | no | Used only with `domainId`. |
 

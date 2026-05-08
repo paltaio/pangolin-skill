@@ -10,8 +10,8 @@ Auth: root API key.
 
 Request:
 
-- Path params: `orgId: nonempty string`, `siteId: positive integer`.
-- Body: `{ eventType: "site_online" | "site_offline" }`.
+- Path params: `orgId: nonempty string`, `siteId: positive integer` (coerced from string).
+- Body (validated with `z.strictObject` — extra keys reject with 400): `{ eventType: "site_online" | "site_offline" }`.
 
 Response data: `{ success: true }`, message `Alert triggered successfully`, status `200`.
 
@@ -25,8 +25,8 @@ Auth: root API key.
 
 Request:
 
-- Path params: `orgId: nonempty string`, `resourceId: positive integer`.
-- Body: `{ eventType: "resource_healthy" | "resource_unhealthy" | "resource_degraded" | "resource_toggle" }`.
+- Path params: `orgId: nonempty string`, `resourceId: positive integer` (coerced from string).
+- Body (validated with `z.strictObject` — extra keys reject with 400): `{ eventType: "resource_healthy" | "resource_unhealthy" | "resource_degraded" | "resource_toggle" }`.
 
 Response data: `{ success: true }`, message `Alert triggered successfully`, status `200`.
 
@@ -40,8 +40,8 @@ Auth: root API key.
 
 Request:
 
-- Path params: `orgId: nonempty string`, `healthCheckId: positive integer`.
-- Body: `{ eventType: "health_check_healthy" | "health_check_unhealthy" }`.
+- Path params: `orgId: nonempty string`, `healthCheckId: positive integer` (coerced from string).
+- Body (validated with `z.strictObject` — extra keys reject with 400): `{ eventType: "health_check_healthy" | "health_check_unhealthy" }`.
 
 Response data: `{ success: true }`, message `Alert triggered successfully`, status `200`.
 
@@ -65,7 +65,7 @@ Response: plain JSON shaped like Pangolin's envelope but sent directly with `res
   data: null;
   success: true;
   error: false;
-  message: string;
+  message: string; // `Certificate update pushed to affected newts for domain "<domain>"`
 }
 ```
 

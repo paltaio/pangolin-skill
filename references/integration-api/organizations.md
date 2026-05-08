@@ -4,10 +4,10 @@ Common `Org` fields:
 
 ```ts
 {
-  orgId: string;
+  orgId: string; // matches /^[a-z0-9_]+(-[a-z0-9_]+)*$/, max 32 chars
   name: string;
-  subnet: string | null;
-  utilitySubnet: string | null;
+  subnet: string | null; // CIDRv4
+  utilitySubnet: string | null; // CIDRv4
   createdAt: string | null;
   requireTwoFactor: boolean | null;
   maxSessionLengthHours: number | null;
@@ -31,7 +31,7 @@ Auth: root API key; action `checkOrgId`.
 
 Request:
 
-- Query: `orgId: string`.
+- Query: `orgId: string` (matches `/^[a-z0-9_]+(-[a-z0-9_]+)*$/`, max 32 chars).
 - Body: none.
 
 Response:
@@ -50,10 +50,10 @@ Request body:
 
 | Field | Type | Required | Constraints |
 | --- | --- | --- | --- |
-| `orgId` | string | yes | 1-32 chars; lowercase letters, numbers, underscores, and single hyphens; no leading, trailing, or consecutive hyphens. |
+| `orgId` | string | yes | Matches `/^[a-z0-9_]+(-[a-z0-9_]+)*$/`, 1-32 chars; lowercase letters, numbers, underscores, and single hyphens; no leading, trailing, or consecutive hyphens. |
 | `name` | string | yes | 1-255 chars. |
-| `subnet` | IPv4 CIDR string | yes | Must pass Pangolin CIDR validation. |
-| `utilitySubnet` | IPv4 CIDR string | yes | Must pass Pangolin CIDR validation and must not overlap `subnet`. |
+| `subnet` | string | yes | CIDRv4 only (IPv6 not supported). Must pass Pangolin CIDR validation. |
+| `utilitySubnet` | string | yes | CIDRv4 only (IPv6 not supported). Must pass Pangolin CIDR validation and must not overlap `subnet`. |
 
 Response:
 
@@ -93,7 +93,7 @@ Auth: API key with org access; action `getOrg`.
 
 Request:
 
-- Path param `orgId: string`.
+- Path param `orgId: string` (matches `/^[a-z0-9_]+(-[a-z0-9_]+)*$/`, max 32 chars).
 - Body: none.
 
 Response data:
@@ -114,7 +114,7 @@ Auth: API key with org access; action `updateOrg`; Limits.
 
 Request:
 
-- Path param `orgId: string`.
+- Path param `orgId: string` (matches `/^[a-z0-9_]+(-[a-z0-9_]+)*$/`, max 32 chars).
 - Body must include at least one field.
 
 Request body:
@@ -125,10 +125,10 @@ Request body:
 | `requireTwoFactor` | boolean | no | Ignored unless the org has the two-factor enforcement feature. |
 | `maxSessionLengthHours` | number or null | no | Ignored unless the org has the session duration policies feature. |
 | `passwordExpiryDays` | number or null | no | Ignored unless the org has the password expiration policies feature. |
-| `settingsLogRetentionDaysRequest` | number | no | Minimum is `0` on SaaS, `-1` otherwise. SaaS tiers cap the maximum. |
-| `settingsLogRetentionDaysAccess` | number | no | Minimum is `0` on SaaS, `-1` otherwise. SaaS tiers cap the maximum. |
-| `settingsLogRetentionDaysAction` | number | no | Minimum is `0` on SaaS, `-1` otherwise. SaaS tiers cap the maximum. |
-| `settingsLogRetentionDaysConnection` | number | no | Minimum is `0` on SaaS, `-1` otherwise. SaaS tiers cap the maximum. |
+| `settingsLogRetentionDaysRequest` | number | no | Minimum is `0` on SaaS, `-1` otherwise. Sentinels: `-1` keep forever (OSS only), `0` no retention, `9001` end of next calendar year. SaaS tier ceilings: free 3, tier1 7, tier2 30, tier3 90, enterprise unlimited. |
+| `settingsLogRetentionDaysAccess` | number | no | Minimum is `0` on SaaS, `-1` otherwise. Sentinels: `-1` keep forever (OSS only), `0` no retention, `9001` end of next calendar year. SaaS tier ceilings: free 3, tier1 7, tier2 30, tier3 90, enterprise unlimited. |
+| `settingsLogRetentionDaysAction` | number | no | Minimum is `0` on SaaS, `-1` otherwise. Sentinels: `-1` keep forever (OSS only), `0` no retention, `9001` end of next calendar year. SaaS tier ceilings: free 3, tier1 7, tier2 30, tier3 90, enterprise unlimited. |
+| `settingsLogRetentionDaysConnection` | number | no | Minimum is `0` on SaaS, `-1` otherwise. Sentinels: `-1` keep forever (OSS only), `0` no retention, `9001` end of next calendar year. SaaS tier ceilings: free 3, tier1 7, tier2 30, tier3 90, enterprise unlimited. |
 
 Response:
 
@@ -143,7 +143,7 @@ Auth: root API key; action `deleteOrg`.
 
 Request:
 
-- Path param `orgId: string`.
+- Path param `orgId: string` (matches `/^[a-z0-9_]+(-[a-z0-9_]+)*$/`, max 32 chars).
 - Body: none.
 
 Response:
@@ -159,7 +159,7 @@ Auth: API key with org access; action `resetSiteBandwidth`.
 
 Request:
 
-- Path param `orgId: string`.
+- Path param `orgId: string` (matches `/^[a-z0-9_]+(-[a-z0-9_]+)*$/`, max 32 chars).
 - Body: none.
 
 Response:
@@ -175,7 +175,7 @@ Auth: API key with org access. No action permission check is applied.
 
 Request:
 
-- Path param `orgId: string`.
+- Path param `orgId: string` (matches `/^[a-z0-9_]+(-[a-z0-9_]+)*$/`, max 32 chars).
 - Query params: none.
 - Body: none.
 
@@ -189,7 +189,7 @@ Response data:
     domain: string;
     enabled: boolean;
     protected: boolean;
-    protocol: string;
+    protocol: "tcp" | "udp"; // always "tcp" for HTTP resources
     sso: boolean;
     password: boolean;
     pincode: boolean;
@@ -199,8 +199,8 @@ Response data:
     siteResourceId: number;
     name: string;
     destination: string;
-    mode: string;
-    protocol: string | null;
+    mode: "host" | "cidr" | "http";
+    protocol: "http" | "https" | null; // sourced from siteResource.scheme
     enabled: boolean;
     alias: string | null;
     aliasAddress: string | null;

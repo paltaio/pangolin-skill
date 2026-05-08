@@ -40,7 +40,7 @@ Response data:
   users: Array<{
     userId: string;
     username: string;
-    type: string;
+    type: "internal" | "oidc";
     idpName: string | null;
     idpId: number | null;
     email: string | null;

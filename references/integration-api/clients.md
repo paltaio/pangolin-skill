@@ -56,7 +56,7 @@ Response data:
     megabytesIn: number | null;
     megabytesOut: number | null;
     orgName: string | null;
-    type: string;
+    type: "olm" | string; // API only creates "olm"; DB column is open-ended varchar
     online: boolean;
     olmVersion: string | null;
     userId: string | null;
@@ -125,7 +125,7 @@ Response data: a client row with OLM/user metadata:
   megabytesOut: number | null;
   lastBandwidthUpdate: string | null;
   lastPing: number | null;
-  type: string;
+  type: "olm" | string; // API only creates "olm"; DB column is open-ended varchar
   online: boolean;
   lastHolePunch: number | null;
   maxConnections: number | null;
@@ -139,7 +139,7 @@ Response data: a client row with OLM/user metadata:
   userUsername: string | null;
   fingerprint: object | null;
   posture: object | null;
-  userType: string | null;
+  userType: "internal" | "oidc" | null;
   idpName: string | null;
   idpVariant: string | null;
 }

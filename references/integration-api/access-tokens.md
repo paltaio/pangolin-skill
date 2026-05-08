@@ -11,31 +11,31 @@ Auth: API key with resource access; root keys pass resource access; action `gene
 Request:
 
 - Path param `resourceId: positive integer`.
-- Body:
+- Body (`strictObject`, unknown keys rejected):
 
 ```ts
 {
-  validForSeconds?: positive integer; // seconds
+  validForSeconds?: number; // integer, positive (seconds)
   title?: string;
   description?: string;
 }
 ```
 
-If `validForSeconds` is omitted, `sessionLength` defaults to `SESSION_COOKIE_EXPIRES` and `expiresAt` is `null`.
+If `validForSeconds` is omitted, `sessionLength` defaults to `SESSION_COOKIE_EXPIRES` (`1000 * 60 * 60 * server.resource_session_length_hours` ms) and `expiresAt` is `null`. When provided, `sessionLength` is stored as `validForSeconds * 1000` (ms), so the request unit (seconds) and the stored/returned unit (ms) differ.
 
 Response data:
 
 ```ts
 {
-  accessTokenId: string;
+  accessTokenId: string;       // 8-char id (generateId(8))
   orgId: string;
   resourceId: number;
-  expiresAt: number | null;
-  sessionLength: number;
+  expiresAt: number | null;    // epoch ms
+  sessionLength: number;       // ms (validForSeconds * 1000, or SESSION_COOKIE_EXPIRES default)
   title: string | null;
   description: string | null;
-  createdAt: number;
-  accessToken: string;
+  createdAt: number;           // epoch ms
+  accessToken: string;         // raw token from generateIdFromEntropySize(16)
 }
 ```
 
@@ -74,15 +74,15 @@ Response data:
 ```ts
 {
   accessTokens: Array<{
-    accessTokenId: string;
+    accessTokenId: string;       // 8-char id
     orgId: string;
     resourceId: number;
-    sessionLength: number;
-    expiresAt: number | null;
-    tokenHash: string;
+    sessionLength: number;       // ms
+    expiresAt: number | null;    // epoch ms
+    tokenHash: string;           // sha256 hex of the raw token
     title: string | null;
     description: string | null;
-    createdAt: number;
+    createdAt: number;           // epoch ms
     resourceName: string | null;
     resourceNiceId: string | null;
     siteName: string | null;

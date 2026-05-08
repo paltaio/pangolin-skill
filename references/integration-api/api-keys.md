@@ -11,7 +11,7 @@ Auth: root API key; action `listApiKeys`.
 Request:
 
 - Path param `orgId: string`.
-- Query params:
+- Query params (string-encoded over the wire, coerced to int):
   - `limit?: positive integer`, default `1000`.
   - `offset?: nonnegative integer`, default `0`.
 - No body.
@@ -48,7 +48,7 @@ Auth: root API key; action `setApiKeyActions`; Limits; action audit.
 Request:
 
 - Path params: path params: `orgId: string` and `apiKeyId: nonempty string`.
-- Body: `{ actionIds: [string, ...string[]] }`; duplicates are removed before writing. Every action ID must exist in the `actions` table.
+- Body: `{ actionIds: [ApiKeyActionId, ...ApiKeyActionId[]] }` (at least one); duplicates are removed before writing. Each `actionId` must be a member of `ActionsEnum` (see `API_KEY_ACTION_IDS` in `types.ts`) AND exist in the `actions` table — the route runs `select ... from actions where actionId in (...)` and returns `400 "One or more actions do not exist"` if any are missing.
 
 Response: envelope with `data: {}`, message `API key actions updated successfully`, status `200`.
 
@@ -63,7 +63,7 @@ Auth: root API key; action `listApiKeyActions`.
 Request:
 
 - Path params: path params: `orgId: string` and `apiKeyId: nonempty string`.
-- Query params:
+- Query params (string-encoded over the wire, coerced to int):
   - `limit?: positive integer`, default `1000`.
   - `offset?: nonnegative integer`, default `0`.
 - No body.
@@ -73,7 +73,7 @@ Response data:
 ```ts
 {
   actions: Array<{
-    actionId: string;
+    actionId: ApiKeyActionId; // member of ActionsEnum; see API_KEY_ACTION_IDS
   }>;
   pagination: {
     total: number;
@@ -96,7 +96,7 @@ Auth: root API key; action `createApiKey`; Limits; action audit.
 Request:
 
 - Path param `orgId: nonempty string`.
-- Body: `{ name: string }`; `name` length must be 1-255.
+- Body: `{ name: string }`; `name` length must be 1..255.
 
 Response data:
 

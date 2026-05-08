@@ -16,7 +16,7 @@ Common `Resource` fields:
   blockAccess: boolean;
   sso: boolean;
   http: boolean;
-  protocol: string;
+  protocol: "tcp" | "udp"; // HTTP resources are stored as "tcp"
   proxyPort: number | null;
   emailWhitelistEnabled: boolean;
   applyRules: boolean;
@@ -35,7 +35,7 @@ Common `Resource` fields:
   maintenanceMessage: string | null;
   maintenanceEstimatedTime: string | null;
   postAuthPath: string | null;
-  health: "healthy" | "unhealthy" | "unknown" | string | null;
+  health: "healthy" | "unhealthy" | "unknown" | null;
   wildcard: boolean;
 }
 ```
@@ -48,15 +48,15 @@ Common `Target` fields:
   resourceId: number;
   siteId: number;
   ip: string;
-  method: string | null;
+  method: "http" | "https" | "h2c" | string | null; // only these three are honored by Traefik for HTTP resources
   port: number;
   internalPort: number | null;
   enabled: boolean;
   path: string | null;
-  pathMatchType: string | null;
+  pathMatchType: "exact" | "prefix" | "regex" | null;
   rewritePath: string | null;
-  rewritePathType: string | null;
-  priority: number;
+  rewritePathType: "exact" | "prefix" | "regex" | "stripPrefix" | null;
+  priority: number; // 1-1000
 }
 ```
 
@@ -134,7 +134,7 @@ Query params:
 | `order` | `"asc" | "desc"` | `"asc"` | Invalid values fall back to `"asc"`. |
 | `enabled` | `"true" | "false"` | none | Transformed to boolean; invalid values ignored. |
 | `authState` | `"protected" | "not_protected" | "none"` | none | Filters by auth mechanisms or non-HTTP resources. |
-| `healthStatus` | `"healthy" | "degraded" | "unhealthy" | "unknown"` | none | OpenAPI description says `offline`, but schema enum uses `unhealthy`. |
+| `healthStatus` | `"healthy" | "degraded" | "unhealthy" | "unknown"` | none | Wire value is `"unhealthy"`; OpenAPI description says `"offline"` but `"offline"` is rejected. |
 | `siteId` | positive integer | none | Filters to resources with at least one target on the site. |
 
 Response data:
@@ -152,13 +152,13 @@ Response data:
     pincodeId: number | null;
     whitelist: boolean;
     http: boolean;
-    protocol: string;
+    protocol: "tcp" | "udp";
     proxyPort: number | null;
     wildcard: boolean;
     enabled: boolean;
     domainId: string | null;
     headerAuthId: number | null;
-    health: string | null;
+    health: "healthy" | "unhealthy" | "unknown" | null;
     targets: Array<{
       targetId: number;
       resourceId: number;
@@ -299,16 +299,18 @@ JSON body:
 | --- | --- | --- | --- |
 | `siteId` | positive integer | yes | Target site. |
 | `ip` | string | yes | Must pass `isTargetValid`. WireGuard sites also require IP within site subnet. |
-| `method` | string or null | no | Upstream scheme used by the gateway to dial the target. For HTTP resources (`http: true` on the parent resource), set to `"http"` or `"https"` — leaving it `null` passes API validation but causes 503 at request time. For raw resources (`http: false`), leave `null`. |
+| `method` | `"http" | "https" | "h2c"` or null | no | Upstream scheme used by the gateway to dial the target. Zod accepts any non-empty string here, but Traefik only honors `"http"`, `"https"`, or `"h2c"` for HTTP resources (`http: true` on the parent); `null`, empty string, or any other value passes API validation but causes 503 at request time. For raw resources (`http: false`), leave `null`. |
 | `port` | integer | yes | 1-65535. |
 | `enabled` | boolean | no | Defaults to `true`. |
 | `hcEnabled` | boolean | no | Defaults health check enabled false. |
 | `hcPath` | string or null | no | Min 1 when string. |
-| `hcScheme`, `hcMode`, `hcHostname`, `hcTlsServerName` | string or null | no | Stored on health check. |
+| `hcScheme` | string or null | no | Zod accepts any string; only `"http"` or `"https"` are meaningful at runtime. |
+| `hcMode` | string or null | no | Zod accepts any string; Newt special-cases `"tcp"` (skips path/method); any other value is treated as HTTP. DB default is `"http"`. |
+| `hcHostname`, `hcTlsServerName` | string or null | no | Stored on health check. |
 | `hcPort`, `hcInterval`, `hcUnhealthyInterval`, `hcTimeout`, `hcHealthyThreshold`, `hcUnhealthyThreshold` | positive integer or null | no | Minimum 1 when present. |
 | `hcHeaders` | array or null | no | Items are `{ name: string; value: string }`; stored as JSON string. |
 | `hcFollowRedirects` | boolean or null | no | Stored on health check. |
-| `hcMethod` | string or null | no | Min 1 when string. |
+| `hcMethod` | string or null | no | Min 1 when string. Zod accepts any string; Newt forwards verbatim. Standard values are `"GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS"`; DB default is `"GET"`. |
 | `hcStatus` | integer or null | no | Stored on health check. |
 | `path` | string or null | no | Stored on target. |
 | `pathMatchType` | `"exact" | "prefix" | "regex" | null` | no | Stored on target. |
@@ -358,7 +360,7 @@ Response data:
     hcFollowRedirects: boolean | null;
     hcMethod: string | null;
     hcStatus: number | null;
-    hcHealth: string | null;
+    hcHealth: "unknown" | "healthy" | "unhealthy" | null;
     hcTlsServerName: string | null;
     hcHealthyThreshold: number | null;
     hcUnhealthyThreshold: number | null;
@@ -467,8 +469,8 @@ Response data:
   rules: Array<{
     ruleId: number;
     resourceId: number;
-    action: string;
-    match: string;
+    action: "ACCEPT" | "DROP" | "PASS";
+    match: "CIDR" | "IP" | "PATH" | "COUNTRY" | "ASN" | "REGION";
     value: string;
     priority: number;
     enabled: boolean;
