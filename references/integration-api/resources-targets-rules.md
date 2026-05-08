@@ -299,7 +299,7 @@ JSON body:
 | --- | --- | --- | --- |
 | `siteId` | positive integer | yes | Target site. |
 | `ip` | string | yes | Must pass `isTargetValid`. WireGuard sites also require IP within site subnet. |
-| `method` | string or null | no | Stored on target. |
+| `method` | string or null | no | Upstream scheme used by the gateway to dial the target. For HTTP resources (`http: true` on the parent resource), set to `"http"` or `"https"` — leaving it `null` passes API validation but causes 503 at request time. For raw resources (`http: false`), leave `null`. |
 | `port` | integer | yes | 1-65535. |
 | `enabled` | boolean | no | Defaults to `true`. |
 | `hcEnabled` | boolean | no | Defaults health check enabled false. |
